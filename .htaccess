@@ -1,28 +1,26 @@
-# Apache URL Rewriting for PHP API
+# 1. Unified Routing Logic
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /api/
     
-    # Route all requests to index.php
+    # Since your files are in the ROOT of the repo, use /
+    RewriteBase /
+
+    # Handle OPTIONS (Preflight) requests immediately
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule ^(.*)$ index.php [L]
+
+    # Route all requests to index.php if the file/folder doesn't exist
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ index.php [QSA,L]
+    RewriteRule ^(.*)$ index.php [L,QSA]
 </IfModule>
 
-# CORS Headers
+# 2. CORS Headers (Essential for your ZamboSur Crafts Frontend)
 <IfModule mod_headers.c>
     Header set Access-Control-Allow-Origin "*"
     Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
 </IfModule>
 
-# Handle preflight requests
-<IfModule mod_rewrite.c>
-    RewriteCond %{REQUEST_METHOD} OPTIONS
-    RewriteRule ^(.*)$ index.php [L]
-</IfModule>
-
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php [L,QSA]
+# 3. Fallback
+DirectoryIndex index.php
