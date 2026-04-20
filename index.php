@@ -61,9 +61,7 @@ $path = trim($path, '/');
 $segments = explode('/', $path);
 $path = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $segments = explode('/', $path);
-$segments = array_values(array_filter($rawSegments, function($seg) {
-    return $seg !== 'index.php' && $seg !== 'api' && $seg !== '';
-}));
+
 
 /// 4. THE ROUTER
 
