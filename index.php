@@ -1,7 +1,8 @@
 <?php
 
 /** ZamboSur Crafts PHP Backend API **/
-
+ini_set('session.cookie_samesite', 'None');
+ini_set('session.cookie_secure', 'True'); // Required for SameSite=None
 session_start();
 
 header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
