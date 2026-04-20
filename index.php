@@ -2,20 +2,20 @@
 
 /** ZamboSur Crafts PHP Backend API **/
 ini_set('session.cookie_samesite', 'None');
-ini_set('session.cookie_secure', 'True'); // Required for SameSite=None
+ini_set('session.cookie_secure', 'True'); 
 session_start();
 
-header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
-header("Access-Control-Allow-Origin: *");
+// 1. CHANGE THIS: Replace '*' with your actual frontend URL
+header("Access-Control-Allow-Origin: https://zambosur-crafts.onrender.com");
+
+// 2. ADD THIS: This allows the browser to actually send the session cookie
+header("Access-Control-Allow-Credentials: true");
+
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Headers: Content-Type, ngrok-skip-browser-warning");
-
-
-
-
+header("Access-Control-Allow-Headers: Content-Type, Authorization, ngrok-skip-browser-warning");
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200); // Good practice to send a 200 status
     exit; 
 }
 
