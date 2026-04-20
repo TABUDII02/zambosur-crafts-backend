@@ -56,7 +56,7 @@ $input = file_get_contents('php://input');
 $data = json_decode($input, true) ?? [];
 
 $path = $_SERVER['PATH_INFO'] ?? $_SERVER['REQUEST_URI'] ?? '';
-$path = str_replace('/zambosur_craft/backend/index.php', '', $path);
+$path = str_replace('https://zambosur-api-v2.onrender.com', '', $path);
 $path = trim($path, '/');
 
 // --- 1. Public Endpoints ---
