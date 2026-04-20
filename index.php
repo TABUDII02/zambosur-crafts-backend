@@ -1,27 +1,26 @@
 <?php
-/** ZamboSur Crafts PHP Backend API **/
+/** ZamboSur Crafts - CORS Fix **/
 
-// 1. Set Session Cookie Parameters FIRST
-ini_set('session.cookie_samesite', 'None');
-ini_set('session.cookie_secure', 'True'); 
-session_start();
+// 1. Remove any duplicate headers added by Apache/Render
+header_remove("Access-Control-Allow-Origin");
+header_remove("Access-Control-Allow-Credentials");
 
-// 2. Define the exact Frontend URL
-$frontend_url = "https://zambosur-crafts.onrender.com";
-
-// 3. Clear any existing headers and set the correct ones
-header("Access-Control-Allow-Origin: $frontend_url");
+// 2. Set the secure headers manually
+header("Access-Control-Allow-Origin: https://zambosur-crafts.onrender.com");
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, ngrok-skip-browser-warning");
 
-// 4. Handle the OPTIONS request immediately
+// 3. IMPORTANT: Handle the "Preflight" OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     http_response_code(200);
     exit; 
 }
 
-// 5. Tell the browser the response is always JSON
+// 4. Session and Content Type
+ini_set('session.cookie_samesite', 'None');
+ini_set('session.cookie_secure', 'True'); 
+session_start();
 header('Content-Type: application/json');
 
 
