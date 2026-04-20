@@ -1,0 +1,21 @@
+
+# Database & API Secrets (CRITICAL)
+.env
+config.php
+connection.php
+db_creds.php
+
+# XAMPP / Local Server specific
+php_errors.log
+.htaccess
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Dependencies
+/vendor/
+
+# Temporary files
+*.log
+*.tmp
