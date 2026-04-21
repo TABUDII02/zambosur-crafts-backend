@@ -32,43 +32,33 @@ $input = file_get_contents('php://input');
 $data = json_decode($input, true) ?? [];
 
 // --- 4. Public Endpoints ---
-// Use strpos to be more flexible with the path
+// This handles the initial login attempt
 if ($method === 'POST' && (strpos($path, 'login') !== false)) {
-    // Clear any previous output buffers
     if (ob_get_length()) ob_clean(); 
-    
     header('Content-Type: application/json');
     echo json_encode(adminLogin($data['username'] ?? '', $data['password'] ?? ''));
-    exit; // VERY IMPORTANT: Stops the script immediately
+    exit; 
 }
 
-// --- 5. Protected Admin Routes ---
+// --- 5. Admin Routing Block ---
 if (strpos($path, 'admin') === 0) {
-    
-    header('Content-Type: application/json'); // Set JSON header for all admin routes
-
-   if (strpos($path, 'admin') === 0) {
     header('Content-Type: application/json');
 
-    // 1. PUBLIC ADMIN ROUTES (No login required to attempt these)
-    if ($path === 'admin/login') {
-        // Your login logic here
-        exit;
-    }
-
-    // 2. LOGOUT ROUTE (Must be reachable to clear the session)
+    // A. LOGOUT (Always accessible so users can clear sessions)
     if ($path === 'admin/logout') {
         echo json_encode(adminLogout());
         exit;
     }
 
-    // 3. PROTECTED ROUTES (Everything below this requires a valid session)
+    // B. AUTHENTICATION GUARD (The Firewall)
+    // Everything below this point requires the user to be logged in.
     if (!isAdminLoggedIn()) {
         http_response_code(401);
         echo json_encode(['error' => 'Unauthorized. Please log in again.']);
         exit;
     }
 
+    // C. PROTECTED SUB-ROUTES
     $segments = explode('/', $path);
 
     // ROUTE: admin/products
@@ -103,19 +93,17 @@ if (strpos($path, 'admin') === 0) {
         exit;
     }
 
-    // Default Admin 404
+    // D. ADMIN-SPECIFIC 404
     http_response_code(404);
     echo json_encode(['error' => 'Admin sub-endpoint not found', 'path_debug' => $path]);
     exit;
 }
 
 // --- FINAL FALLBACK ---
-// If it's not an admin route and reaches here, it's a true 404
 http_response_code(404);
 header('Content-Type: application/json');
 echo json_encode(['error' => 'Endpoint not found', 'path_debug' => $path]);
 exit;
-
 // --- 6. Route Handler Functions ---
 
 function handleProducts($path, $method, $data) {
