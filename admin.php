@@ -26,32 +26,42 @@ $path = trim($path, '/');
 $input = file_get_contents('php://input');
 $data = json_decode($input, true) ?? [];
 
-// 4. Public Endpoints (No Login Required)
+// --- 4. Public Endpoints ---
+// This handles BOTH "admin/login" and "login"
 if ($method === 'POST' && ($path === 'admin/login' || $path === 'login')) {
+    header('Content-Type: application/json');
     echo json_encode(adminLogin($data['username'] ?? '', $data['password'] ?? ''));
-    exit;
+    exit; // STOP HERE so index.php doesn't run
 }
 
-// 5. Protected Admin Routes
+// --- 5. Protected Admin Routes ---
 if (strpos($path, 'admin') === 0) {
     
-    // SECURITY CHECK: Verify session
+    // Check login
     if (!isAdminLoggedIn()) {
         http_response_code(401);
+        header('Content-Type: application/json');
         echo json_encode(['error' => 'Unauthorized. Please log in again.']);
         exit;
     }
 
-    $segments = explode('/', $path); // ['admin', 'products', '91']
+    $segments = explode('/', $path);
+
+    // If the path is JUST "admin" or "admin/", show a default message or error
+    if (count($segments) < 2) {
+        http_response_code(400);
+        echo json_encode(['error' => 'No admin sub-endpoint specified']);
+        exit;
+    }
 
     // ROUTE: admin/products
-    if (isset($segments[1]) && $segments[1] === 'products') {
+    if ($segments[1] === 'products') {
         handleProducts($path, $method, $data);
         exit;
     } 
 
     // ROUTE: admin/orders
-    if (isset($segments[1]) && $segments[1] === 'orders') {
+    if ($segments[1] === 'orders') {
         if ($path === 'admin/orders/update') {
             updateOrderStatus($data['order_id'] ?? null, $data);
         } else {
