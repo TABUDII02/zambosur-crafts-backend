@@ -59,31 +59,31 @@ $method = $_SERVER['REQUEST_METHOD'];
 $input = file_get_contents('php://input');
 $data = json_decode($input, true) ?? [];
 
-// 2. Reliable Path Detection
+// --- 2. Reliable Path Detection ---
 $request_uri = $_SERVER['REQUEST_URI'];
 $script_name = $_SERVER['SCRIPT_NAME'];
 
-// This removes the script name (index.php) and the folder path automatically
+// Remove the script name and any subfolders (like /api or /backend)
 $path = str_replace([$script_name, dirname($script_name)], '', $request_uri);
-
-// Remove query strings (?id=123) if they exist
-$path = explode('?', $path)[0];
-
-// Clean up 'api/' and slashes
-$path = str_replace('api/', '', $path);
+$path = explode('?', $path)[0]; // Remove query strings
 $path = trim($path, '/');
 
-// 3. Create Segments for Routing
+// Create the clean segments
 $segments = explode('/', $path);
-$path = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-$segments = explode('/', $path);
-
 
 /// 4. THE ROUTER
 
 
 // --- ADMIN ROUTES ---
 if (isset($segments[0]) && trim($segments[0]) === 'admin') {
+
+    // 🔥 ADD THIS FIREWALL: 
+    // Except for the login path, everything in 'admin' must be blocked
+    if ($segments[1] !== 'login' && !isAdminLoggedIn()) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Unauthorized']);
+        exit;
+    }
     
     // Normalize the module name
     $module = isset($segments[1]) ? strtolower(trim($segments[1])) : '';
