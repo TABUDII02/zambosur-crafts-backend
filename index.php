@@ -1224,9 +1224,12 @@ function handleRemoveAction($table) {
 }
 
 function getUserCart() {
+   if (ob_get_length()) {
     ob_clean();
-    header('Content-Type: application/json');
-
+}
+header('Content-Type: application/json');
+echo json_encode($response);
+exit; // Always exit after sending JSON to prevent extra text
     $id_from_session = $_SESSION['user_id'] ?? null;
     $conn = getDBConnection();
 
