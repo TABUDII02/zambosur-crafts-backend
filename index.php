@@ -1454,7 +1454,6 @@ function updateCustomerProfile() {
 }
 
 function saveCustomerAddress() {
-    // FIX 1: Only clean buffer if it's not empty to avoid the "Failed to delete" notice
     if (ob_get_length()) {
         ob_clean();
     }
@@ -1463,14 +1462,13 @@ function saveCustomerAddress() {
 
     if (!isset($_SESSION['user_id'])) {
         echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-        exit; // Changed return to exit to stop execution
+        exit; 
     }
 
     $data = json_decode(file_get_contents('php://input'), true);
     $user_id = $_SESSION['user_id'];
     $conn = getDBConnection();
 
-    // FIX 2: Use null coalescing (??) for every $data field to prevent "Undefined Index" notices
     $is_default = $data['is_default'] ?? 0;
 
     if ($is_default == 1) {
@@ -1479,13 +1477,13 @@ function saveCustomerAddress() {
         $reset->execute();
     }
 
+    // FIX FOR OPTION 1: Added full_address to the column list and an extra '?'
     $sql = "INSERT INTO customer_addresses 
-            (customer_id, label, receiver_name, phone, street, barangay, city, province, zip_code, address_type, is_default) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            (customer_id, label, receiver_name, phone, street, barangay, city, province, zip_code, address_type, is_default, full_address) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
     $stmt = $conn->prepare($sql);
     
-    // FIX 3: Map data safely to variables before binding
     $label    = $data['label'] ?? 'Home';
     $receiver = $data['receiver'] ?? '';
     $phone    = $data['phone'] ?? '';
@@ -1496,7 +1494,11 @@ function saveCustomerAddress() {
     $zip      = $data['zip'] ?? '';
     $type     = $data['address_type'] ?? 'Home';
 
-    $stmt->bind_param("isssssssssi", 
+    // FIX FOR OPTION 1: Generate the combined string
+    $full_address = trim("$street, $barangay, $city, $province", ", ");
+
+    // FIX FOR OPTION 1: Changed "isssssssssi" to "isssssssssis" (added 's' at the end)
+    $stmt->bind_param("isssssssssis", 
         $user_id, 
         $label, 
         $receiver, 
@@ -1507,7 +1509,8 @@ function saveCustomerAddress() {
         $province, 
         $zip, 
         $type, 
-        $is_default
+        $is_default,
+        $full_address // Added this variable to the binding
     );
 
     if ($stmt->execute()) {
@@ -1519,7 +1522,6 @@ function saveCustomerAddress() {
     $conn->close();
     exit;
 }
-
 function getCustomerAddresses() {
     ob_clean();
     header('Content-Type: application/json');
