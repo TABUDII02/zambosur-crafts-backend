@@ -23,10 +23,9 @@ ini_set('session.cookie_secure', 'True');
 session_set_cookie_params([
     'lifetime' => 86400,
     'path' => '/',
-    'domain' => 'zambosur-api-v2.onrender.com', // Your Render API domain
-    'secure' => true,      // Must be true for HTTPS
-    'httponly' => true,    // Protects against XSS
-    'samesite' => 'None',  // CRITICAL: Allows the cookie to be sent across domains
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'None',
 ]);
 session_start();
 header('Content-Type: application/json');
