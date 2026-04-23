@@ -93,12 +93,6 @@ if (strpos($path, 'admin') === 0) {
         exit;
     }
 
-    // D. ADMIN-SPECIFIC 404
-    http_response_code(404);
-    echo json_encode(['error' => 'Admin sub-endpoint not found', 'path_debug' => $path]);
-    exit;
-}
-
 // --- FINAL FALLBACK ---
 http_response_code(404);
 header('Content-Type: application/json');
