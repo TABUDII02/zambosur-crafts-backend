@@ -955,13 +955,13 @@ function handleSignup() {
 /**
  * Handle Customer Login (Sign In)
  */
-function handleSignin() {
+function handleSignin($data) { // <--- Accept $data here
 
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
 
-    $data = json_decode(file_get_contents('php://input'), true);
+    // REMOVE the file_get_contents line from inside here!
     
     $email = trim($data['email'] ?? '');
     $password = $data['password'] ?? '';
