@@ -197,6 +197,16 @@ if (isset($segments[0]) && trim($segments[0]) === 'admin') {
     exit;
 }
 
+// 2. SECOND, if it wasn't admin, check if it's AUTH (Customers)
+elseif (isset($segments[0]) && $segments[0] === 'auth') {
+    
+    if (isset($segments[1]) && $segments[1] === 'login') {
+        // This calls the CUSTOMER function we fixed earlier
+        handleSignin($data); 
+        exit;
+    }
+}
+
 
 // --- USER ACTIONS (Cart, Wishlist, Saved Items) ---
 if (isset($segments[0]) && $segments[0] === 'user') {
