@@ -37,7 +37,8 @@ $data = json_decode($input, true);
 
 require_once 'config.php';
 $conn = getDBConnection();
-require_once 'admin-auth.php'; 
+require_once 'admin-auth.php';
+require_once 'admin.php';
 
 // Only load PHPMailer if the folder exists to prevent crashing
 if (file_exists(__DIR__ . '/vendor/PHPMailer/src/PHPMailer.php')) {
@@ -83,27 +84,88 @@ $path = trim($path, '/');
 $segments = ($path === '') ? [] : explode('/', $path);
 
 /// 4. THE ROUTER
+// --- 1. ADMIN ROUTES ---
+// This ONLY executes if the first part of the URL is 'admin'
+if (isset($segments[0]) && trim($segments[0]) === 'admin') {
+    
+    // Explicit Admin Login Handler
+    if (isset($segments[1]) && $segments[1] === 'login') {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // This is the ONLY place this specific error message should come from
+            $res = adminLogin($data['username'] ?? '', $data['password'] ?? '');
+            echo json_encode($res);
+        }
+        exit; 
+    }
 
+    // 2. The Firewall for all other admin routes
+    if (!isAdminLoggedIn()) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Unauthorized']);
+        exit;
+    }
+    
+    // Normalize the module name
+    $module = isset($segments[1]) ? strtolower(trim($segments[1])) : '';
+
+    if ($module === 'orders') {
+        if (isset($segments[2]) && $segments[2] === 'update' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            // update logic here
+            exit;
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            getAdminOrders();
+            exit;
+        }
+    } 
+    
+    // Use ELSEIF to ensure only one module runs
+    elseif ($module === 'products') {
+        handleProducts($path, $_SERVER['REQUEST_METHOD'], $data); 
+        exit;
+    }
+
+    // THE CUSTOMER GATEWAY
+    elseif ($module === 'customers') {
+        // Check for DELETE action
+        if (isset($segments[2]) && $segments[2] === 'delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Ensure deleteCustomer() is defined and takes the ID
+            $data = json_decode(file_get_contents("php://input"), true) ?? [];
+            deleteCustomer((int)($data['id'] ?? 0)); 
+            exit;
+        }
+
+        // Handle the GET request for the table
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            getAdminCustomers(); // This calls your function above
+            exit;
+        }
+    }
+
+    // If the code reaches here, it means $module was not 'orders', 'products', or 'customers'
+    header('Content-Type: application/json');
+    echo json_encode(["error" => "Endpoint not found: admin/" . $module]);
+    exit;
+}
 
 // --- CUSTOMER AUTH ROUTES ---
 $data = json_decode(file_get_contents("php://input"), true) ?? [];
 if (isset($segments[0]) && $segments[0] === 'auth') {
 
-
-    // 1. Handle Signup (The missing part)
-    if (isset($segments[1]) && $segments[1] === 'signup') {
+    if (isset($segments[1]) && $segments[1] === 'login') {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            handleSignup($data); 
+            // Pass the $data array (which contains your email/pass) to the function
+            handleSignin($data); 
         } else {
             echo json_encode(['error' => 'Method not allowed']);
         }
         exit;
     }
 
-    if (isset($segments[1]) && $segments[1] === 'login') {
+     // 1. Handle Signup (The missing part)
+    if (isset($segments[1]) && $segments[1] === 'signup') {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Pass the $data array (which contains your email/pass) to the function
-            handleSignin($data); 
+            handleSignup($data); 
         } else {
             echo json_encode(['error' => 'Method not allowed']);
         }
@@ -133,22 +195,6 @@ if (isset($segments[0]) && $segments[0] === 'auth') {
     }
 }
 
-// --- THE TRAFFIC COP ---
-if (isset($segments[0]) && $segments[0] === 'admin') {
-    // Send all /admin/... requests to the separate admin file
-    require_once 'admin.php'; 
-    exit; 
-}
-
-// 2. SECOND, if it wasn't admin, check if it's AUTH (Customers)
-elseif (isset($segments[0]) && $segments[0] === 'auth') {
-    
-    if (isset($segments[1]) && $segments[1] === 'login') {
-        // This calls the CUSTOMER function we fixed earlier
-        handleSignin($data); 
-        exit;
-    }
-}
 
 
 // --- USER ACTIONS (Cart, Wishlist, Saved Items) ---
