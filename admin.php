@@ -206,7 +206,7 @@ function deleteProduct($id) {
 /**
  * Get All Products with Category
  */
-function getAllProducts() {
+/*function getAllProducts() {
     $conn = getDBConnection();
     
     $sql = "SELECT p.*, c.name AS category_name 
@@ -227,7 +227,7 @@ function getAllProducts() {
     }
     
     $conn->close();
-}
+}*/
 
 /**
  * Get Best Seller Products
