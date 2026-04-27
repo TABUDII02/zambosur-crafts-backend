@@ -206,7 +206,7 @@ function deleteProduct($id) {
 /**
  * Get All Products with Category
  */
-function getAllProducts() {
+/*function getAllProducts() {
     $conn = getDBConnection();
     
     $sql = "SELECT p.*, c.name AS category_name 
@@ -232,7 +232,7 @@ function getAllProducts() {
 /**
  * Get Best Seller Products
  */
-function getBestSellers() {
+/*function getBestSellers() {
     $conn = getDBConnection();
     
     // Using 1 instead of TRUE is safer for MySQL tinyint columns
@@ -254,6 +254,6 @@ function getBestSellers() {
     
     $conn->close();
     exit; // IMPORTANT: Stop the script here so the router doesn't add more output
-}
+}*/
 
 ?>
