@@ -38,7 +38,7 @@ $data = json_decode($input, true);
 require_once 'config.php';
 $conn = getDBConnection();
 //require_once 'admin-auth.php';
-//require_once 'admin.php';
+require_once 'admin.php';
 
 // Only load PHPMailer if the folder exists to prevent crashing
 if (file_exists(__DIR__ . '/vendor/PHPMailer/src/PHPMailer.php')) {
