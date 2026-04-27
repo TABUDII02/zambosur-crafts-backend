@@ -86,7 +86,7 @@ $segments = ($path === '') ? [] : explode('/', $path);
 /// 4. THE ROUTER
 // --- 1. ADMIN ROUTES ---
 // This ONLY executes if the first part of the URL is 'admin'
-if (isset($segments[0]) && trim($segments[0]) === 'admin') {
+/*if (isset($segments[0]) && trim($segments[0]) === 'admin') {
     
     // Explicit Admin Login Handler
     if (isset($segments[1]) && $segments[1] === 'login') {
@@ -146,7 +146,7 @@ if (isset($segments[0]) && trim($segments[0]) === 'admin') {
     header('Content-Type: application/json');
     echo json_encode(["error" => "Endpoint not found: admin/" . $module]);
     exit;
-}
+}*/
 
 // --- CUSTOMER AUTH ROUTES ---
 $data = json_decode(file_get_contents("php://input"), true) ?? [];
